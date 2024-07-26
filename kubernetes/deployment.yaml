@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wisecow-deployment
+  namespace: wisecow
+  labels:
+    app: wisecow
+spec:
+  selector:
+    matchLabels:
+      app: wisecow
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: wisecow
+    spec:
+      containers:
+      - name: wisecow
+        image: docker.io/karma792/wisecow:latest
+        ports:
+        - containerPort:  4499
+      restartPolicy: Always
