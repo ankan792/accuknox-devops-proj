@@ -30,26 +30,26 @@ jobs:
         tags: karma792/wisecow:latest
 
   deploy:
+    name: Deploy
+    needs: build 
     runs-on: ubuntu-latest
-    needs: build
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Set the Kubernetes context
+        uses: azure/k8s-set-context@v2
+        with:
+          method: service-account
+          k8s-url: http://52.249.190.107:6443
+          k8s-secret: ${{ secrets.KUBERNETES_SECRET }}
 
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v1
-      with:
-        version: 'latest'
+      - name: Checkout source code
+        uses: actions/checkout@v3
 
-    - name: Configure kubeconfig
-      run: |
-        mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
-
-    - name: Deploy to Kubernetes
-      run: |
-        kubectl create -f kubernetes/deployment.yaml --validate=false
-        kubectl create -f kubernetes/service.yaml --validate=false
-        kubectl create -f kubernetes/ingress.yaml --validate=false
+      - name: Deploy to the Kubernetes cluster
+        uses: azure/k8s-deploy@v1
+        with:
+          namespace: default
+          manifests: |
+            kubernetes/deployment.yaml
+            kubernetes/ingress.yaml
+            kubernetes/service.yaml
 
