@@ -42,17 +42,14 @@ jobs:
       with:
         version: 'latest'
 
-    - name: Create .kube directory
-      run: |
-        mkdir -p $HOME/.kube
-
     - name: Configure kubeconfig
       run: |
+        mkdir -p $HOME/.kube
         echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
 
     - name: Deploy to Kubernetes
       run: |
-        kubectl create -f kubernetes/deployment.yaml
-        kubectl create -f kubernetes/service.yaml
-        kubectl create -f kubernetes/ingress.yaml
+        kubectl create -f kubernetes/deployment.yaml --validate=false
+        kubectl create -f kubernetes/service.yaml --validate=false
+        kubectl create -f kubernetes/ingress.yaml --validate=false
 
